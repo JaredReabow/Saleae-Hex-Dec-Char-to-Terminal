@@ -1,0 +1,13 @@
+{
+  "name": "Hex/Dec/Char Processor",
+  "apiVersion": "1.0.0",
+  "author": "Jared Reabow",
+  "version": "0.0.1",
+  "description": "Converts analyser output to Hex,Dec or Char and outputs to terminal and overlay, includes delimiter processing to format output based on specified HEX,DEC or CHAR delimiter.",
+  "extensions": {
+    "Hex to Terminal": {
+      "type": "HighLevelAnalyzer",
+      "entryPoint": "HighLevelAnalyzer.Hla"
+    }
+  }
+}
