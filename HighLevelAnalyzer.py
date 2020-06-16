@@ -1,5 +1,6 @@
 # High Level Analyzer
 # For more information and documentation, please go to https://support.saleae.com/extensions/high-level-analyzer-extensions
+from time import *
 
 from saleae.analyzers import HighLevelAnalyzer, AnalyzerFrame, StringSetting, NumberSetting, ChoicesSetting
 
@@ -14,8 +15,15 @@ class Hla(HighLevelAnalyzer):
     delimiter = ""
     lineLimit = ""
 
+    startTime = 0;
+    startFrameTime = 0
+    startChunkTime = 0
+    firstFrame = True
+
     delimiterFound = False
     delimiterProcessing = False
+    customFrameTag = False
+
     rowStore = ""
     unknownStore = ""
     previousFrameValue = ""
@@ -47,12 +55,30 @@ class Hla(HighLevelAnalyzer):
         currentFrameValueHex = frame.data['data'].hex()
         currentFrameValueDec = int(currentFrameValueHex,16)
 
+        hours = int(str(frame.start_time).split("T")[1].split(":")[0]) * 60 * 60
+        minutes = int(str(frame.start_time).split("T")[1].split(":")[1]) * 60
+        seconds = float(((str(frame.start_time).split("T")[1].split(":")[2]).split("Z"))[0])
+
+        hoursEnd = int(str(frame.end_time).split("T")[1].split(":")[0]) * 60 * 60
+        minutesEnd = int(str(frame.end_time).split("T")[1].split(":")[1]) * 60
+        secondsEnd = float(((str(frame.end_time).split("T")[1].split(":")[2]).split("Z"))[0])
+
+        totalSecondsStart =  hours + minutes + seconds
+
+        totalSecondsEnd = hoursEnd + minutesEnd + secondsEnd
+
+        if self.firstFrame == True:
+            self.startTime = totalSecondsStart
+            self.startFrameTime = frame.start_time
+            self.firstFrame = False
+
 
         # If the character matches the one we are searching for, output a new frame
         if self.Line_start_delimiter_Type == 'HEX':
             if currentFrameValueHex == self.delimiter:
                 print("")
                 self.delimiterFound = True
+                startChunkTime = totalSecondsStart
         elif self.Line_start_delimiter_Type == 'DEC':
             if int(currentFrameValueDec) == int(self.delimiter):
                 print("")
@@ -85,11 +111,15 @@ class Hla(HighLevelAnalyzer):
             self.rowStore = outputString
             self.delimiterProcessing = True
             self.delimiterFound = False
+
             print("Delimiter " + self.Line_start_delimiter_Type + " Val: " + self.delimiter + ", Terminal outputting " + self.Terminal_output_type)
-            print("")
+            print(" Total runTime: " + str(totalSecondsEnd - self.startTime))
+            print(" Chunk time: " + str(totalSecondsEnd-startChunkTime))
+            print(" Chunk START time: " + str(frame.start_time).split("T")[1], " Chunk END time: " + str(frame.end_time).split("T")[1])
+            print(" First frame time: " + str(self.startFrameTime).split("T")[1], " Last frame time: " + str(frame.end_time).split("T")[1])
 
         else:
-            print(outputString)
+            print(outputString )
 
 
 
@@ -99,8 +129,15 @@ class Hla(HighLevelAnalyzer):
                  })'''
 
         #self.delimiterFound = False
-        # Return the data frame itself
-        return AnalyzerFrame('mytype', frame.start_time, frame.end_time, {
-            'input_type': "DEC: " + str(currentFrameValueDec) + "  HEX: 0x" + currentFrameValueHex + " CHAR: " + chr(currentFrameValueDec),
-        })
+        if self.customFrameTag == False:
+            # Return the data frame itself
+            return AnalyzerFrame('mytype', frame.start_time, frame.end_time, {
+                'input_type': "DEC: " + str(currentFrameValueDec) + "  HEX: 0x" + currentFrameValueHex + " CHAR: " + chr(currentFrameValueDec),
+            })
+        else:
+            # Return the data frame itself
+            return AnalyzerFrame('mytype', frame.start_time, frame.end_time, {
+                'input_type': "DEC: " + str(
+                    currentFrameValueDec) + "  HEX: 0x" + currentFrameValueHex + " CHAR: " + chr(currentFrameValueDec),
+            })
 
