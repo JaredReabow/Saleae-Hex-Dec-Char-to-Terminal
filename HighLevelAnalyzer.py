@@ -11,6 +11,10 @@ class Hla(HighLevelAnalyzer):
     Line_start_delimiter_Type = ChoicesSetting(choices=('HEX', 'DEC', 'CHAR'))
     Line_start_delimiter = StringSetting(label='Line start delimiter')
     Terminal_output_type = ChoicesSetting(choices=('HEX', 'DEC', 'HEX & DEC', 'CHAR'))
+    Output_Chunk_Time = ChoicesSetting(choices=('Yes', 'No'))
+    Output_Frame_Time = ChoicesSetting(choices=('Yes', 'No'))
+    Output_Configuration = ChoicesSetting(choices=('Yes', 'No'))
+
 
     delimiter = ""
     lineLimit = ""
@@ -112,11 +116,14 @@ class Hla(HighLevelAnalyzer):
             self.delimiterProcessing = True
             self.delimiterFound = False
 
-            print("Delimiter " + self.Line_start_delimiter_Type + " Val: " + self.delimiter + ", Terminal outputting " + self.Terminal_output_type)
-            print(" Total runTime: " + str(totalSecondsEnd - self.startTime))
-            print(" Chunk time: " + str(totalSecondsEnd-startChunkTime))
-            print(" Chunk START time: " + str(frame.start_time).split("T")[1], " Chunk END time: " + str(frame.end_time).split("T")[1])
-            print(" First frame time: " + str(self.startFrameTime).split("T")[1], " Last frame time: " + str(frame.end_time).split("T")[1])
+            if self.Output_Chunk_Time == 'Yes':
+                print(" Chunk time: " + str(totalSecondsEnd-startChunkTime))
+                print(" Chunk START time: " + str(frame.start_time).split("T")[1], " Chunk END time: " + str(frame.end_time).split("T")[1])
+            if self.Output_Frame_Time == 'Yes':
+                print(" First frame time: " + str(self.startFrameTime).split("T")[1]," Last frame time: " + str(frame.end_time).split("T")[1])
+            if self.Output_Configuration == 'Yes':
+                print(" Delimiter " + self.Line_start_delimiter_Type + " Val: " + self.delimiter + ", Terminal outputting " + self.Terminal_output_type)
+                print(" Total runTime: " + str(totalSecondsEnd - self.startTime))
 
         else:
             print(outputString )
