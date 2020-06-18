@@ -111,7 +111,7 @@ class Hla(HighLevelAnalyzer):
         elif self.delimiterFound == True and self.delimiterProcessing == True:
             print("")
             print(self.rowStore)
-
+            self.rowStore = ""
             self.rowStore = outputString
             self.delimiterProcessing = True
             self.delimiterFound = False
@@ -127,7 +127,7 @@ class Hla(HighLevelAnalyzer):
 
         else:
             print(outputString )
-
+            outputString = ""
 
 
         '''if self.deliniator == self.Line_start_delimiter:
